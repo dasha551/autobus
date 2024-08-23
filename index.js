@@ -15,6 +15,9 @@ const port = 3000;
 
 const app = express();
 
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 const loadBuses = async () => {
     const data = await readFile(path.join(__dirname, 'buses.json'), 'utf-8');
     return JSON.parse(data);
@@ -54,13 +57,23 @@ const sendUpdatedData = async () => {
         const nextDeparture = getNextDeparture(bus.firstDepartureTime, bus.frequencyMinutes);
         console.log('nextDeparture: ', nextDeparture);
         return {...bus, nextDeparture: {
-            data: nextDeparture.toFormat('yyyy-MM-dd'),
+            date: nextDeparture.toFormat('yyyy-MM-dd'),
             time: nextDeparture.toFormat('HH:mm:ss'),
         }}
     });
     return updatedBuses;
 };
 
+const sortBuses = (buses) => 
+    [...buses].sort((a,b) =>{
+        new Date (
+            `${a.nextDeparture.date}T${a.nextDeparture.time}`,
+        ) -
+
+        new Date(
+            `${a.nextDeparture.date}T${a.nextDeparture.time}`,
+            );
+    });
 
 
 
@@ -68,6 +81,7 @@ app.get("/next-departure", async (req, res) => {
 
     try {
         const updatedBuses = await sendUpdatedData();
+        const sortedBuses = sortBuses(updatedBuses);
 
         // ДЗ
         res.json(updatedBuses);
